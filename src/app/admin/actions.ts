@@ -14,6 +14,7 @@ import {
 import { limpiarIntentos, permitirIntento } from "@/lib/ratelimit";
 import { esSlugValido, normalizarUrl, slugify } from "@/lib/slug";
 import { generarPassword, sufijoAleatorio } from "@/lib/secretos";
+import { aLinkDeResena } from "@/lib/google";
 
 export type EstadoAccion = {
   ok: boolean;
@@ -35,6 +36,37 @@ function ip(): string {
 
 function exigirAdmin() {
   if (!haySesionAdmin()) redirect("/admin");
+}
+
+/**
+ * El destino puede venir escrito de varias formas. Si el admin pidió
+ * "link de reseñas" y pegó un lugar de Google, lo convertimos; si no,
+ * tomamos la URL tal cual.
+ */
+async function resolverDestino(
+  crudo: string,
+  comoResena: boolean,
+): Promise<{ url: string } | { error: string }> {
+  const texto = crudo.trim();
+  if (!texto) return { error: "Falta la URL de destino." };
+
+  if (comoResena) {
+    const resena = await aLinkDeResena(texto);
+    if (resena) return { url: resena };
+
+    // Si pidió reseñas pero no reconocimos el lugar, mejor avisar que
+    // guardar en silencio un link que no hace lo que espera.
+    return {
+      error:
+        "No pude reconocer el lugar de Google. Pegá el link largo de Maps " +
+        "(el de la barra de direcciones) o el Place ID, o destildá la opción " +
+        "de reseñas para guardar la URL tal cual.",
+    };
+  }
+
+  const url = normalizarUrl(texto);
+  if (!url) return { error: "La URL de destino no es válida." };
+  return { url };
 }
 
 // ------------------------------- Login ---------------------------------
@@ -99,10 +131,9 @@ export async function crearCliente(
     return { ok: false, error: "El nombre del local es obligatorio." };
   }
 
-  const url = normalizarUrl(urlCruda);
-  if (!url) {
-    return { ok: false, error: "La URL de destino no es válida." };
-  }
+  const destino = await resolverDestino(urlCruda, formData.get("resenas") === "on");
+  if ("error" in destino) return { ok: false, error: destino.error };
+  const url = destino.url;
 
   const base = slugPedido ? slugify(slugPedido) : slugify(nombre);
   if (!base || !esSlugValido(base)) {
@@ -154,15 +185,20 @@ export async function actualizarCliente(
 
   const id = String(formData.get("id") ?? "");
   const slug = slugify(String(formData.get("slug") ?? ""));
-  const url = normalizarUrl(String(formData.get("redirect_url") ?? ""));
   const nombre = String(formData.get("nombre_local") ?? "").trim();
 
   if (!id) return { ok: false, error: "Falta el cliente." };
   if (!esSlugValido(slug)) {
     return { ok: false, error: "Slug inválido (letras, números y guiones)." };
   }
-  if (!url) return { ok: false, error: "La URL de destino no es válida." };
   if (nombre.length < 2) return { ok: false, error: "El nombre es obligatorio." };
+
+  const destino = await resolverDestino(
+    String(formData.get("redirect_url") ?? ""),
+    formData.get("resenas") === "on",
+  );
+  if ("error" in destino) return { ok: false, error: destino.error };
+  const url = destino.url;
 
   const { data: choque, error: errBusca } = await getSupabase()
     .from("clientes")

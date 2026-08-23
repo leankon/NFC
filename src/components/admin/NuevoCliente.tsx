@@ -5,6 +5,7 @@ import { useFormState } from "react-dom";
 import { crearCliente, type EstadoAccion } from "@/app/admin/actions";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { Credenciales } from "@/components/admin/Credenciales";
+import { CampoResenas } from "@/components/admin/CampoResenas";
 
 const inicial: EstadoAccion = { ok: false };
 
@@ -50,17 +51,18 @@ export function NuevoCliente({ baseUrl }: { baseUrl: string }) {
             />
           </div>
 
-          <div className="sm:col-span-1">
+          <div className="sm:col-span-2">
             <label className="label" htmlFor="redirect_url">
-              URL de destino
+              Destino
             </label>
             <input
               id="redirect_url"
               name="redirect_url"
               className="input"
-              placeholder="https://g.page/r/…"
+              placeholder="Pegá acá el link de Google Maps del local"
               required
             />
+            <CampoResenas />
           </div>
 
           <div className="sm:col-span-1">

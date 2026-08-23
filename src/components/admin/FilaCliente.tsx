@@ -12,6 +12,7 @@ import {
 } from "@/app/admin/actions";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { Credenciales } from "@/components/admin/Credenciales";
+import { CampoResenas } from "@/components/admin/CampoResenas";
 import type { ClienteConClicks } from "@/lib/types";
 
 const inicial: EstadoAccion = { ok: false };
@@ -158,13 +159,16 @@ export function FilaCliente({
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="label">URL de destino</label>
+                  <label className="label">Destino</label>
                   <input
                     name="redirect_url"
                     className="input"
                     defaultValue={cliente.redirect_url}
                     required
                   />
+                  {/* Al editar viene destildada: lo guardado ya suele ser el
+                      link final, y no queremos reconvertirlo sin querer. */}
+                  <CampoResenas porDefecto={false} />
                 </div>
 
                 <div className="sm:col-span-4 flex items-center gap-3">

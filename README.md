@@ -74,9 +74,13 @@ revalidar ni cachés que limpiar.
 ### Dar de alta un local
 
 1. Entrá a `/admin` con la contraseña maestra.
-2. **+ Crear cliente** → nombre del local y URL de destino. El slug se genera
-   solo a partir del nombre (podés escribir uno propio) y se crea una
-   contraseña aleatoria.
+2. **+ Crear cliente** → nombre del local y destino. El slug se genera solo a
+   partir del nombre (podés escribir uno propio) y se crea una contraseña
+   aleatoria.
+
+   Con **"Es para pedir reseñas en Google"** tildado (lo normal), pegás el link
+   del local en Google Maps y la app lo convierte en el link que abre directo
+   la ventana de reseñas. Destildala para guardar cualquier otra URL tal cual.
 3. La pantalla te muestra el **link NFC**, el **link del panel** y la
    **contraseña**. Copialas: la contraseña no se puede volver a ver, solo
    regenerar con **Nueva clave**.
@@ -98,6 +102,13 @@ entre este mes, los últimos 90 días y todo el historial.
 ---
 
 ## Notas de implementación
+
+**Link de reseñas de Google.** Una URL de Maps trae el identificador interno
+del lugar (`!1s0x…:0x…`), y el Place ID que necesita Google es exactamente esos
+dos números de 64 bits en protobuf y base64url. Así que la conversión se
+calcula en `src/lib/google.ts`, sin API key ni llamadas a Google. Los links
+cortos (`maps.app.goo.gl`) sí requieren seguir el redirect, y eso solo salta
+entre hosts de Google.
 
 **Horarios.** `hora` y `dia_semana` se calculan al momento del click en la zona
 horaria de `APP_TIMEZONE`, no en UTC — así "horario pico" significa algo para el
@@ -121,8 +132,9 @@ lo necesitás más estricto.
 ## Tests
 
 ```bash
-npm test              # zona horaria + build + smoke end-to-end
+npm test              # zona horaria + links de Google + build + smoke end-to-end
 npm run test:time     # solo el cálculo de hora/día/mes
+npm run test:google   # solo la conversión de Maps a link de reseñas
 npm run test:smoke    # solo el smoke (necesita un build previo)
 ```
 
