@@ -152,6 +152,12 @@ npm i -D playwright-core
 npm run build && npm run test:browser     # deja capturas en ./capturas
 ```
 
+## Pendientes
+
+Lo que conviene mejorar y todavía no está hecho está en
+[`MEJORAS.md`](MEJORAS.md), ordenado por riesgo: la pausa automática de
+Supabase, la gestión de cobros y la tendencia mes a mes son los tres primeros.
+
 ## Seguridad
 
 `npm audit` reporta un aviso *high* sobre `next` cuyo rango cubre **todas** las
