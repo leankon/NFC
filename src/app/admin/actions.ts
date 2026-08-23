@@ -12,13 +12,8 @@ import {
   passwordAdminCorrecta,
 } from "@/lib/session";
 import { limpiarIntentos, permitirIntento } from "@/lib/ratelimit";
-import {
-  esSlugValido,
-  generarPassword,
-  normalizarUrl,
-  slugify,
-  sufijoAleatorio,
-} from "@/lib/slug";
+import { esSlugValido, normalizarUrl, slugify } from "@/lib/slug";
+import { generarPassword, sufijoAleatorio } from "@/lib/secretos";
 
 export type EstadoAccion = {
   ok: boolean;

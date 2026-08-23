@@ -1,5 +1,7 @@
-import { randomBytes } from "crypto";
-
+/**
+ * Helpers de slug y URL. Sin dependencias de Node: se pueden importar
+ * tanto del servidor como de un componente cliente.
+ */
 /** Convierte "Café Don José" -> "cafe-don-jose" */
 export function slugify(input: string): string {
   return input
@@ -15,24 +17,6 @@ export const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/;
 
 export function esSlugValido(slug: string): boolean {
   return SLUG_REGEX.test(slug);
-}
-
-/** Sufijo corto para desambiguar slugs repetidos. */
-export function sufijoAleatorio(len = 4): string {
-  const alfabeto = "abcdefghijkmnpqrstuvwxyz23456789";
-  const bytes = randomBytes(len);
-  let out = "";
-  for (let i = 0; i < len; i++) out += alfabeto[bytes[i] % alfabeto.length];
-  return out;
-}
-
-/** Contraseña legible para entregarle al local. */
-export function generarPassword(len = 10): string {
-  const alfabeto = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = randomBytes(len);
-  let out = "";
-  for (let i = 0; i < len; i++) out += alfabeto[bytes[i] % alfabeto.length];
-  return out;
 }
 
 /** Normaliza la URL de destino y valida que sea http(s). */
