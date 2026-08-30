@@ -152,6 +152,19 @@ npm i -D playwright-core
 npm run build && npm run test:browser     # deja capturas en ./capturas
 ```
 
+## Instalarlo en el celular
+
+El sitio se puede agregar a la pantalla de inicio y se abre sin la barra del
+navegador, con su propio ícono.
+
+- **Android (Chrome):** menú de tres puntos → *Instalar aplicación* o
+  *Agregar a pantalla principal*.
+- **iPhone (Safari):** botón de compartir → *Agregar a pantalla de inicio*.
+  Tiene que ser Safari; desde Chrome en iOS no aparece la opción.
+
+Si en vez de la portada querés el acceso directo al panel, entrá primero a
+`/admin` y hacé el mismo paso desde ahí: el ícono queda apuntando a esa página.
+
 ## Pendientes
 
 Lo que conviene mejorar y todavía no está hecho está en
