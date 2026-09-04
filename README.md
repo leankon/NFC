@@ -38,6 +38,7 @@ Copiá `.env.example` a `.env.local` y completá:
 | `SUPABASE_SERVICE_ROLE_KEY` | **Secreta.** Solo se usa en el servidor |
 | `ADMIN_PASSWORD` | Contraseña maestra de `/admin` |
 | `SESSION_SECRET` | Firma las cookies de sesión (mín. 16 caracteres) |
+| `CRON_SECRET` | Opcional pero recomendada. Protege la tarea que mantiene despierta a Supabase |
 | `APP_TIMEZONE` | Opcional. Zona horaria del negocio. Default: `America/Argentina/Buenos_Aires` |
 | `NEXT_PUBLIC_SITE_URL` | Opcional. Solo si usás dominio propio |
 
@@ -109,6 +110,18 @@ dos números de 64 bits en protobuf y base64url. Así que la conversión se
 calcula en `src/lib/google.ts`, sin API key ni llamadas a Google. Los links
 cortos (`maps.app.goo.gl`) sí requieren seguir el redirect, y eso solo salta
 entre hosts de Google.
+
+**Que Supabase no se pause.** El plan gratuito suspende los proyectos que pasan
+varios días sin recibir consultas, y eso deja sin funcionar todas las tarjetas
+a la vez. `vercel.json` declara una tarea que llama a `/api/cron/ping` cada 4
+días; esa ruta hace un `count` y nada más. El margen es holgado: el hueco más
+largo entre disparos es de 3 días contra los 7 que tarda la suspensión.
+
+Con `CRON_SECRET` definida, la ruta exige ese valor en el header
+`Authorization` — Vercel lo manda solo. Sin la variable la ruta queda abierta
+pero funciona igual, a propósito: es preferible una ruta pública que solo
+cuenta filas antes que un ping que falla en silencio y deja que el proyecto se
+duerma.
 
 **Horarios.** `hora` y `dia_semana` se calculan al momento del click en la zona
 horaria de `APP_TIMEZONE`, no en UTC — así "horario pico" significa algo para el

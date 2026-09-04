@@ -17,6 +17,7 @@ const PUERTO_DB = 54321;
 const BASE = `http://127.0.0.1:${PUERTO_NEXT}`;
 const SECRETO = "secreto-de-prueba-suficientemente-largo";
 const CLAVE_MAESTRA = "clave-maestra-test";
+const SECRETO_CRON = "secreto-del-cron-de-prueba";
 
 const CLIENTE_A = "11111111-1111-4111-8111-111111111111";
 const CLIENTE_B = "22222222-2222-4222-8222-222222222222";
@@ -68,6 +69,7 @@ const next = spawn(
       SUPABASE_URL: `http://127.0.0.1:${PUERTO_DB}`,
       SUPABASE_SERVICE_ROLE_KEY: "fake-key",
       ADMIN_PASSWORD: CLAVE_MAESTRA,
+      CRON_SECRET: SECRETO_CRON,
       SESSION_SECRET: SECRETO,
       APP_TIMEZONE: "America/Argentina/Buenos_Aires",
       NODE_ENV: "production",
@@ -232,7 +234,22 @@ try {
   html = await (await get("/dashboard/otro-local", cookieLocal("otro-local"))).text();
   check("un local con 1 solo click no rompe", html.includes("Otro Local") && html.includes("Horario pico"));
 
-  // ==================== 4. Hash de contraseñas ====================
+  // ==================== 4. Ping que mantiene despierta la base ====
+  console.log("\n— Ping anti-pausa");
+
+  const clicksAntes = db.clicks.length;
+  r = await get("/api/cron/ping");
+  check("sin el secreto correcto rechaza", r.status === 401, `status ${r.status}`);
+
+  r = await fetch(`${BASE}/api/cron/ping`, {
+    headers: { authorization: `Bearer ${SECRETO_CRON}` },
+  });
+  check("con el secreto responde ok", r.status === 200, `status ${r.status}`);
+  const cuerpo = await r.json();
+  check("el ping consultó la base", cuerpo.ok === true, JSON.stringify(cuerpo));
+  check("el ping no registra clicks", db.clicks.length === clicksAntes);
+
+  // ==================== 5. Hash de contraseñas ====================
   console.log("\n— Contraseñas");
   const hash = db.clientes[0].password_hash;
   check("el hash guardado es bcrypt", hash.startsWith("$2"));
